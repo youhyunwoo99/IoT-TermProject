@@ -100,9 +100,37 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                 scanWiFiInfo();
-                addDatasetBtn.setEnabled(false);
-                saveDatasetBtn.setEnabled(false);
-                checkDatasetBtn.setEnabled(false);
+                buttonDisable();
+            }
+        });
+
+        //getSharedPreferences("파일이름",'모드')
+        //모드 => 0 (읽기,쓰기가능)
+        //모드 => MODE_PRIVATE (이 앱에서만 사용가능)
+        preferences = getSharedPreferences("WiFiDataset", MODE_PRIVATE);
+
+        //버튼 이벤트
+        saveDatasetBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                buttonDisable();
+                //Editor를 preferences에 쓰겠다고 연결
+                SharedPreferences.Editor editor = preferences.edit();
+                //putString(KEY,VALUE)
+                editor.putString(positionText, scanLog);
+                //항상 commit & apply 를 해주어야 저장이 된다.
+                editor.commit();
+                resultText.setText("데이터셋 저장 완료");
+                buttonEnable();
+            }
+        });
+
+        checkDatasetBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                buttonDisable();
+                //메소드 호출
+                getPreferences();
             }
         });
     }
@@ -136,37 +164,8 @@ public class MainActivity extends AppCompatActivity {
                 scanLog += "BSSID: " + scanResult.BSSID + "  level: " + scanResult.level + "\n";
             }
             logTextView.setText(scanLog);
-            addDatasetBtn.setEnabled(true);
-            saveDatasetBtn.setEnabled(true);
-            checkDatasetBtn.setEnabled(true);
-
-            //getSharedPreferences("파일이름",'모드')
-            //모드 => 0 (읽기,쓰기가능)
-            //모드 => MODE_PRIVATE (이 앱에서만 사용가능)
-            preferences = getSharedPreferences("WiFiDataset", MODE_PRIVATE);
-
-            //버튼 이벤트
-            saveDatasetBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //Editor를 preferences에 쓰겠다고 연결
-                    SharedPreferences.Editor editor = preferences.edit();
-                    //putString(KEY,VALUE)
-                    editor.putString(positionText, scanLog);
-                    //항상 commit & apply 를 해주어야 저장이 된다.
-                    editor.commit();
-                    //메소드 호출
-                    getPreferences();
-                }
-            });
-
-            checkDatasetBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //메소드 호출
-                    getPreferences();
-                }
-            });
+            resultText.setText("데이터셋 스캔 완료");
+            buttonEnable();
         }
         };
         //Preferences에서 꺼내오는 메소드
@@ -183,10 +182,31 @@ public class MainActivity extends AppCompatActivity {
 
                 // 키와 값을 출력하거나 원하는 작업 수행
                 Log.d("Result #"+i, key + ": " + value.toString());
-                msg += "Result #"+i + key + ": " + value.toString() + "\n";
+                msg += "Result #"+i+"\n" + key + ": " + value.toString() + "\n";
                 i++;
             }
             logTextView.setText(msg);
+            resultText.setText("데이터셋 불러오기 완료");
+            buttonEnable();
 
+        }
+
+        private void buttonEnable(){
+            addDatasetBtn.setText("ADD");
+            saveDatasetBtn.setText("SAVE");
+            checkDatasetBtn.setText("CHECK");
+
+            addDatasetBtn.setEnabled(true);
+            saveDatasetBtn.setEnabled(true);
+            checkDatasetBtn.setEnabled(true);
+        }
+        private void buttonDisable(){
+            addDatasetBtn.setText("--");
+            saveDatasetBtn.setText("--");
+            checkDatasetBtn.setText("--");
+
+            addDatasetBtn.setEnabled(false);
+            saveDatasetBtn.setEnabled(false);
+            checkDatasetBtn.setEnabled(false);
         }
 }
