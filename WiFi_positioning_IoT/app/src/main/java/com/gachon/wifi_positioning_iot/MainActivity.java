@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -49,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
 
     private String serverAddress;
     private String scanLog;
+
+    private int mode = 0;
 
     JSONObject one_wifi_json = new JSONObject();
     JSONObject result_json = new JSONObject();
@@ -120,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
                 editor.putString(positionText, scanLog);
                 //항상 commit & apply 를 해주어야 저장이 된다.
                 editor.commit();
+                resultText.setBackgroundColor(Color.parseColor("#0000FF"));
                 resultText.setText("데이터셋 저장 완료");
                 buttonEnable();
             }
@@ -131,6 +135,23 @@ public class MainActivity extends AppCompatActivity {
                 buttonDisable();
                 //메소드 호출
                 getPreferences();
+            }
+        });
+
+        TextView positionLabel = (TextView) findViewById(R.id.positionLabel);
+        positionLabel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                positionInput.setText("");
+            }
+        });
+
+        resultText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mode = mode == 0 ? 1 : 0;
+                resultText.setText(mode == 0 ? "모드 변경 - 키" : "모드 변경 - 전체");
+                resultText .setBackgroundColor(Color.parseColor("#000000"));
             }
         });
     }
@@ -164,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
                 scanLog += "BSSID: " + scanResult.BSSID + "  level: " + scanResult.level + "\n";
             }
             logTextView.setText(scanLog);
+            resultText.setBackgroundColor(Color.parseColor("#FF0000"));
             resultText.setText("데이터셋 스캔 완료");
             buttonEnable();
         }
@@ -182,10 +204,15 @@ public class MainActivity extends AppCompatActivity {
 
                 // 키와 값을 출력하거나 원하는 작업 수행
                 Log.d("Result #"+i, key + ": " + value.toString());
-                msg += "Result #"+i+"\n" + key + ": " + value.toString() + "\n";
+                if(mode == 0) {
+                    msg += "Result #" + i + "\n" + key + ":\n" + value.toString() + "\n";
+                }else{
+                    msg += "Result #" + i + "\n" + key + "\n";
+                }
                 i++;
             }
             logTextView.setText(msg);
+            resultText.setBackgroundColor(Color.parseColor("#00FF00"));
             resultText.setText("데이터셋 불러오기 완료");
             buttonEnable();
 
