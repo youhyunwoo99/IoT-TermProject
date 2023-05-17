@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
 
     private int mode = 0;
 
+    private boolean scanFlag = false;
+
     JSONObject one_wifi_json = new JSONObject();
     JSONObject result_json = new JSONObject();
 
@@ -99,7 +101,9 @@ public class MainActivity extends AppCompatActivity {
             serverAddress = serverAddressInput.getText().toString();
             positionText = positionInput.getText().toString();
             if (serverAddress.equals("") || positionText.equals("")) {
+                resultText.setBackgroundColor(Color.parseColor("#000000"));
                 resultText.setText("서버 주소와 위치를 입력해주세요.");
+
             } else {
                 wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                 scanWiFiInfo();
@@ -116,16 +120,30 @@ public class MainActivity extends AppCompatActivity {
         saveDatasetBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                buttonDisable();
-                //Editor를 preferences에 쓰겠다고 연결
-                SharedPreferences.Editor editor = preferences.edit();
-                //putString(KEY,VALUE)
-                editor.putString(positionText, scanLog);
-                //항상 commit & apply 를 해주어야 저장이 된다.
-                editor.commit();
-                resultText.setBackgroundColor(Color.parseColor("#0000FF"));
-                resultText.setText("데이터셋 저장 완료");
-                buttonEnable();
+                Log.d("???",scanLog + positionText);
+                positionText = positionInput.getText().toString();
+                if (positionText == null || positionText.equals("")) {
+                    resultText.setBackgroundColor(Color.parseColor("#000000"));
+                    resultText.setText("위치를 입력해주세요.");
+                }else {
+                    if(scanFlag == false) {
+                        resultText.setBackgroundColor(Color.parseColor("#000000"));
+                        resultText.setText("스캔을 해주세요.");
+                    } else {
+                        buttonDisable();
+                        //Editor를 preferences에 쓰겠다고 연결
+                        SharedPreferences.Editor editor = preferences.edit();
+                        //putString(KEY,VALUE)
+                        editor.putString(positionText, scanLog);
+                        scanLog = "";
+                        //항상 commit & apply 를 해주어야 저장이 된다.
+                        editor.commit();
+                        resultText.setBackgroundColor(Color.parseColor("#0000FF"));
+                        resultText.setText("데이터셋 저장 완료");
+                        scanFlag = false;
+                        buttonEnable();
+                    }
+                }
             }
         });
 
@@ -150,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mode = mode == 0 ? 1 : 0;
-                resultText.setText(mode == 0 ? "모드 변경 - 키" : "모드 변경 - 전체");
+                resultText.setText(mode == 0 ? "모드 - Key" : "모드 - Key:Value");
                 resultText .setBackgroundColor(Color.parseColor("#000000"));
             }
         });
@@ -185,8 +203,10 @@ public class MainActivity extends AppCompatActivity {
                 scanLog += "BSSID: " + scanResult.BSSID + "  level: " + scanResult.level + "\n";
             }
             logTextView.setText(scanLog);
+            scanLog = "";
             resultText.setBackgroundColor(Color.parseColor("#FF0000"));
             resultText.setText("데이터셋 스캔 완료");
+            scanFlag = true;
             buttonEnable();
         }
         };
@@ -212,14 +232,14 @@ public class MainActivity extends AppCompatActivity {
                 i++;
             }
             logTextView.setText(msg);
-            resultText.setBackgroundColor(Color.parseColor("#00FF00"));
+            resultText.setBackgroundColor(Color.parseColor("#33CC00"));
             resultText.setText("데이터셋 불러오기 완료");
             buttonEnable();
 
         }
 
         private void buttonEnable(){
-            addDatasetBtn.setText("ADD");
+            addDatasetBtn.setText("SCAN");
             saveDatasetBtn.setText("SAVE");
             checkDatasetBtn.setText("CHECK");
 
