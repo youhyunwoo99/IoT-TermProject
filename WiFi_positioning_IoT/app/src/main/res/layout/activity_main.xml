@@ -10,20 +10,23 @@
         android:id="@+id/input_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="10dp"
+        android:padding="15dp"
+        android:background="@drawable/round_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="button"
+        app:layout_constraintBottom_toBottomOf="@id/resultText"
+        app:layout_constraintTop_toBottomOf="@id/scroll"
         >
         <EditText
             android:id="@+id/serverAddressInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
             android:hint="Server Address"
             android:minHeight="48dp"
             android:textSize="18sp"
             android:inputType="textUri"
+            app:layout_constraintBottom_toTopOf="@id/userNameInput"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -36,17 +39,49 @@
             android:minHeight="48dp"
             android:textSize="18sp"
             android:inputType="text"
+            app:layout_constraintBottom_toBottomOf="@id/serverAddressInput"
             app:layout_constraintTop_toBottomOf="@id/serverAddressInput"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             />
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <Button
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/input_container"
+        >
+        <TextView
+            android:id="@+id/app_log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="WiFi Scan Result"
+            />
+
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/resultText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:gravity="center"
+        android:text="Result"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/button"
+        />
+
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add Dataset"
         android:layout_marginBottom="30dp"
+        android:padding="15dp"
+        android:background="@drawable/round_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
