@@ -10,11 +10,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -23,7 +25,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,16 +37,23 @@ public class MainActivity extends AppCompatActivity {
     private EditText positionInput;
     private String positionText;
     private TextView resultText;
+    private TextView logTextView;
+
 
     private Button addDatasetBtn;
+    private Button saveDatasetBtn;
+    private Button checkDatasetBtn;
+
 
     private WifiManager wifiManager;
 
     private String serverAddress;
-    private String URL;
+    private String scanLog;
 
     JSONObject one_wifi_json = new JSONObject();
     JSONObject result_json = new JSONObject();
+
+    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +65,12 @@ public class MainActivity extends AppCompatActivity {
 
         serverAddressInput = findViewById(R.id.serverAddressInput);
         addDatasetBtn = findViewById(R.id.button);
+        saveDatasetBtn = findViewById(R.id.button2);
+        checkDatasetBtn = findViewById(R.id.button3);
+
         positionInput = findViewById(R.id.positionInput);
         resultText = findViewById(R.id.resultText);
+        logTextView = findViewById(R.id.app_log);
 
         // WiFi Scan을 위한 권한 요청
         if (ContextCompat.checkSelfPermission(MainActivity.this,
@@ -80,12 +96,13 @@ public class MainActivity extends AppCompatActivity {
             serverAddress = serverAddressInput.getText().toString();
             positionText = positionInput.getText().toString();
             if (serverAddress.equals("") || positionText.equals("")) {
-                resultText.setText("Please input server address and position");
+                resultText.setText("서버 주소와 위치를 입력해주세요.");
             } else {
-                URL = serverAddress + "/add";
                 wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                 scanWiFiInfo();
                 addDatasetBtn.setEnabled(false);
+                saveDatasetBtn.setEnabled(false);
+                checkDatasetBtn.setEnabled(false);
             }
         });
     }
@@ -114,17 +131,62 @@ public class MainActivity extends AppCompatActivity {
             scanResultList.sort((s1, s2) -> s2.level - s1.level);
 
 
-            TextView logTextView = findViewById(R.id.app_log);
-            String scanLog = "";
+            scanLog = "";
             for (ScanResult scanResult : scanResultList) {
                 scanLog += "BSSID: " + scanResult.BSSID + "  level: " + scanResult.level + "\n";
             }
             logTextView.setText(scanLog);
+            addDatasetBtn.setEnabled(true);
+            saveDatasetBtn.setEnabled(true);
+            checkDatasetBtn.setEnabled(true);
 
+            //getSharedPreferences("파일이름",'모드')
+            //모드 => 0 (읽기,쓰기가능)
+            //모드 => MODE_PRIVATE (이 앱에서만 사용가능)
+            preferences = getSharedPreferences("WiFiDataset", MODE_PRIVATE);
 
+            //버튼 이벤트
+            saveDatasetBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Editor를 preferences에 쓰겠다고 연결
+                    SharedPreferences.Editor editor = preferences.edit();
+                    //putString(KEY,VALUE)
+                    editor.putString(positionText, scanLog);
+                    //항상 commit & apply 를 해주어야 저장이 된다.
+                    editor.commit();
+                    //메소드 호출
+                    getPreferences();
+                }
+            });
 
+            checkDatasetBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //메소드 호출
+                    getPreferences();
+                }
+            });
+        }
+        };
+        //Preferences에서 꺼내오는 메소드
+        private void getPreferences(){
 
+            Map<String, ?> allEntries = preferences.getAll();
+
+            int i = 0;
+            String msg ="";
+            // 키-값 쌍을 순회하며 출력하기
+            for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                // 키와 값을 출력하거나 원하는 작업 수행
+                Log.d("Result #"+i, key + ": " + value.toString());
+                msg += "Result #"+i + key + ": " + value.toString() + "\n";
+                i++;
+            }
+            logTextView.setText(msg);
 
         }
-    }
 }
