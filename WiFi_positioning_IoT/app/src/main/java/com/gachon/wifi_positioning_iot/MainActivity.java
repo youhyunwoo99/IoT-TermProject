@@ -22,10 +22,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -49,7 +58,10 @@ public class MainActivity extends AppCompatActivity {
     private WifiManager wifiManager;
 
     private String serverAddress;
+    private String URL;
+
     private String scanLog;
+    private String dbLog;
 
     private int mode = 0;
 
@@ -105,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
                 resultText.setText("서버 주소와 위치를 입력해주세요.");
 
             } else {
+                URL = serverAddress + "/add";
+
                 wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                 scanWiFiInfo();
                 buttonDisable();
@@ -117,35 +131,52 @@ public class MainActivity extends AppCompatActivity {
         preferences = getSharedPreferences("WiFiDataset", MODE_PRIVATE);
 
         //버튼 이벤트
-        saveDatasetBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("???",scanLog + positionText);
-                positionText = positionInput.getText().toString();
-                if (positionText == null || positionText.equals("")) {
-                    resultText.setBackgroundColor(Color.parseColor("#000000"));
-                    resultText.setText("위치를 입력해주세요.");
-                }else {
-                    if(scanFlag == false) {
-                        resultText.setBackgroundColor(Color.parseColor("#000000"));
-                        resultText.setText("스캔을 해주세요.");
-                    } else {
-                        buttonDisable();
-                        //Editor를 preferences에 쓰겠다고 연결
-                        SharedPreferences.Editor editor = preferences.edit();
-                        //putString(KEY,VALUE)
-                        editor.putString(positionText, scanLog);
-                        scanLog = "";
-                        //항상 commit & apply 를 해주어야 저장이 된다.
-                        editor.commit();
-                        resultText.setBackgroundColor(Color.parseColor("#0000FF"));
-                        resultText.setText("데이터셋 저장 완료");
-                        scanFlag = false;
-                        buttonEnable();
-                    }
-                }
+//        saveDatasetBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Log.d("???",scanLog + positionText);
+//                positionText = positionInput.getText().toString();
+//                if (positionText == null || positionText.equals("")) {
+//                    resultText.setBackgroundColor(Color.parseColor("#000000"));
+//                    resultText.setText("위치를 입력해주세요.");
+//                }else {
+//                    if(scanFlag == false) {
+//                        resultText.setBackgroundColor(Color.parseColor("#000000"));
+//                        resultText.setText("스캔을 해주세요.");
+//                    } else {
+//                        buttonDisable();
+//                        //Editor를 preferences에 쓰겠다고 연결
+//                        SharedPreferences.Editor editor = preferences.edit();
+//                        //putString(KEY,VALUE)
+//                        editor.putString(positionText, scanLog);
+//                        //항상 commit & apply 를 해주어야 저장이 된다.
+//                        editor.commit();
+//                        Log.d("???",scanLog + positionText);
+//                        scanLog = "";
+//                        resultText.setBackgroundColor(Color.parseColor("#0000FF"));
+//                        resultText.setText("데이터셋 저장 완료");
+//                        scanFlag = false;
+//                        buttonEnable();
+//                    }
+//                }
+//            }
+//        });
+
+        saveDatasetBtn.setOnClickListener(v -> {
+            serverAddress = serverAddressInput.getText().toString();
+            positionText = "";
+            if (serverAddress.equals("")) {
+                resultText.setText("Please input server address");
+            } else {
+                URL = serverAddress + "/findPosition";
+                Log.d("test12", URL);
+                wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                scanWiFiInfo();
+                buttonDisable();
             }
         });
+
+
 
         checkDatasetBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -168,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mode = mode == 0 ? 1 : 0;
-                resultText.setText(mode == 0 ? "모드 - Key" : "모드 - Key:Value");
+                resultText.setText(mode == 1 ? "모드 - Key" : "모드 - Key:Value");
                 resultText .setBackgroundColor(Color.parseColor("#000000"));
             }
         });
@@ -199,15 +230,90 @@ public class MainActivity extends AppCompatActivity {
 
 
             scanLog = "";
+            dbLog ="";
             for (ScanResult scanResult : scanResultList) {
                 scanLog += "BSSID: " + scanResult.BSSID + "  level: " + scanResult.level + "\n";
+
+                //scanLog += scanResult.toString()+ "\n";
             }
+
             logTextView.setText(scanLog);
-            scanLog = "";
             resultText.setBackgroundColor(Color.parseColor("#FF0000"));
             resultText.setText("데이터셋 스캔 완료");
             scanFlag = true;
             buttonEnable();
+
+            // 서버에 보낼 JSON 설정 부분
+            try {
+                result_json.put("position", positionText);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            JSONArray json_array = new JSONArray();
+            for (ScanResult scanResult : scanResultList) {
+                one_wifi_json = new JSONObject();
+                String bssid = scanResult.BSSID;
+                int rssi = scanResult.level;
+
+                try {
+                    one_wifi_json.put("bssid", bssid);
+                    one_wifi_json.put("rssi", rssi);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                json_array.put(one_wifi_json);
+            }
+            try {
+                result_json.put("wifi_data", json_array);
+
+                EditText passwordText = findViewById(R.id.userNameInput);
+                result_json.put("password", passwordText.getText().toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            // 서버와 통신하는 부분
+            try {
+                RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+                String mRequestBody = result_json.toString(); // json 을 통신으로 보내기위해 문자열로 변환하는 부분
+
+                Log.d("제발",URL+mRequestBody);
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, response -> {
+                    Log.i("test12", response);
+                    resultText.setText(response); // 결과 출력해주는 부분
+                    buttonDisable();
+                }, error -> {
+                    Log.d("test12", "????"+error.toString());
+                    resultText.setText("Connection error! Check server address!\n?");
+                    buttonEnable();
+                }) {
+                    @Override
+                    public String getBodyContentType() {
+                        return "application/json; charset=utf-8";
+                    }
+
+                    @Override
+                    public byte[] getBody() { // 요청 보낼 데이터를 처리하는 부분
+                        return mRequestBody.getBytes(StandardCharsets.UTF_8);
+                    }
+
+                    @Override
+                    protected Response<String> parseNetworkResponse(NetworkResponse response) { // onResponse 에 넘겨줄 응답을 처리하는 부분
+                        String responseString = "";
+                        if (response != null) {
+                            responseString = new String(response.data, StandardCharsets.UTF_8); // 응답 데이터를 변환해주는 부분
+                        }
+                        return Response.success(responseString, HttpHeaderParser.parseCacheHeaders(response));
+                    }
+                };
+                requestQueue.add(stringRequest);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+
+
         }
         };
         //Preferences에서 꺼내오는 메소드
@@ -217,6 +323,7 @@ public class MainActivity extends AppCompatActivity {
 
             int i = 0;
             String msg ="";
+            String log ="";
             // 키-값 쌍을 순회하며 출력하기
             for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
                 String key = entry.getKey();
@@ -225,13 +332,16 @@ public class MainActivity extends AppCompatActivity {
                 // 키와 값을 출력하거나 원하는 작업 수행
                 Log.d("Result #"+i, key + ": " + value.toString());
                 if(mode == 0) {
-                    msg += "Result #" + i + "\n" + key + ":\n" + value.toString() + "\n";
+                    msg += "Result #" + i + " " + key + ":\n" + value.toString() + "\n";
                 }else{
-                    msg += "Result #" + i + "\n" + key + "\n";
+                    msg += "Result #" + i + " " + key + "\n";
                 }
+                log += key + "\n" + value.toString() + "\n";
+
                 i++;
             }
             logTextView.setText(msg);
+            Log.d("Dataset",log);
             resultText.setBackgroundColor(Color.parseColor("#33CC00"));
             resultText.setText("데이터셋 불러오기 완료");
             buttonEnable();
@@ -240,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
 
         private void buttonEnable(){
             addDatasetBtn.setText("SCAN");
-            saveDatasetBtn.setText("SAVE");
+            saveDatasetBtn.setText("FIND");
             checkDatasetBtn.setText("CHECK");
 
             addDatasetBtn.setEnabled(true);
