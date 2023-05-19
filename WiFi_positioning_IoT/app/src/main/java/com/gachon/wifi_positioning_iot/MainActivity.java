@@ -239,7 +239,6 @@ public class MainActivity extends AppCompatActivity {
 
             logTextView.setText(scanLog);
             resultText.setBackgroundColor(Color.parseColor("#FF0000"));
-            resultText.setText("데이터셋 스캔 완료");
             scanFlag = true;
             buttonEnable();
 
@@ -279,8 +278,9 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.d("제발",URL+mRequestBody);
                 StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, response -> {
-                    Log.i("test12", response);
-                    resultText.setText(response); // 결과 출력해주는 부분
+                    Log.i("test1233", response);
+                    String position = response.split("\"")[3];
+                    resultText.setText(position); // 결과 출력해주는 부분
                     buttonDisable();
                 }, error -> {
                     Log.d("test12", "????"+error.toString());
