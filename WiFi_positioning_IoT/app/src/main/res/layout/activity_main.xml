@@ -44,7 +44,8 @@
             android:minHeight="48dp"
             android:textSize="16sp"
             android:inputType="textUri"
-            android:text="현재 테스트입니다."
+            android:text="http://172.16.239.26:8004"
+            android:textColor="@color/black"
             app:layout_constraintBottom_toTopOf="@id/userNameInput"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@id/serverAddressLabel"
@@ -74,7 +75,9 @@
             android:minHeight="48dp"
             android:textSize="16sp"
             android:inputType="text"
-            android:text="테스트 ID"
+            android:text=""
+            android:textColor="@color/black"
+
             app:layout_constraintBottom_toTopOf="@id/positionInput"
             app:layout_constraintTop_toBottomOf="@id/serverAddressInput"
             app:layout_constraintStart_toEndOf="@id/userNameLabel"
@@ -101,6 +104,9 @@
             android:hint="Position"
             android:minHeight="48dp"
             android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+
             android:inputType="text"
             app:layout_constraintStart_toEndOf="@id/positionLabel"
             app:layout_constraintEnd_toEndOf="parent"
@@ -122,6 +128,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="WiFi Scan Result"
+            android:textColor="@color/black"
             />
 
     </ScrollView>
@@ -181,7 +188,7 @@
 
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:text="SAVE"
+        android:text="FIND"
         android:textStyle="bold"
         android:textColor="@color/white"
         android:textSize="18sp"
