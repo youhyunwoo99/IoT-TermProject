@@ -1,2 +1,0 @@
--5/14일 레파지토리 개설 및 역할 분담 회의 admin tool app 개발 역할 분담.
-(Fingerprinting 방법으로 진행할 예정 RSSI 단일 속성 사용)
