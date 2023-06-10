@@ -17,7 +17,7 @@
         android:background="@drawable/round_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/button_container"
+        app:layout_constraintBottom_toBottomOf="p"
         app:layout_constraintTop_toBottomOf="@id/scroll"
         >
         <TextView
@@ -119,7 +119,7 @@
         android:padding="15dp"
         android:layout_margin="15dp"
         android:background="@drawable/round_layout"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/resultText"
         app:layout_constraintBottom_toTopOf="@id/input_container"
         >
         <TextView
@@ -144,10 +144,10 @@
         android:textColor="@color/white"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/scroll"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_container" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/button_container"
@@ -158,7 +158,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/input_container"
-        app:layout_constraintBottom_toTopOf="@id/resultText">
+        app:layout_constraintBottom_toBottomOf="parent">
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button"
