@@ -13,11 +13,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="15dp"
-        android:layout_margin="15dp"
+        android:layout_marginStart="19dp"
+        android:layout_marginEnd="19dp"
         android:background="@drawable/round_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="p"
+        app:layout_constraintBottom_toTopOf="@id/button_container"
         app:layout_constraintTop_toBottomOf="@id/scroll"
         >
         <TextView
@@ -44,7 +45,7 @@
             android:minHeight="48dp"
             android:textSize="16sp"
             android:inputType="textUri"
-            android:text="http://"
+            android:text="http://172.16.234.164:8006"
             android:textColor="@color/black"
             app:layout_constraintBottom_toTopOf="@id/userNameInput"
             app:layout_constraintTop_toTopOf="parent"
@@ -112,25 +113,18 @@
             app:layout_constraintTop_toBottomOf="@id/userNameInput"
             app:layout_constraintBottom_toBottomOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <ScrollView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/scroll"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:padding="15dp"
-        android:layout_margin="15dp"
+        android:layout_margin="19dp"
         android:background="@drawable/round_layout"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintTop_toBottomOf="@id/resultText"
         app:layout_constraintBottom_toTopOf="@id/input_container"
         >
-        <TextView
-            android:id="@+id/app_log"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="WiFi Scan Result"
-            android:textColor="@color/black"
-            />
-
-    </ScrollView>
+    </androidx.recyclerview.widget.RecyclerView>
 
     <TextView
         android:id="@+id/resultText"
@@ -153,7 +147,7 @@
         android:id="@+id/button_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="15dp"
+        android:layout_margin="10dp"
         android:padding="5dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -162,7 +156,7 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button"
-        android:layout_width="120dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/round_button"
         android:layout_margin="4dp"
@@ -173,14 +167,14 @@
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/button2"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/button2"
         />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button2"
-        android:layout_width="120dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/round_button"
         android:layout_margin="4dp"
@@ -191,10 +185,10 @@
         android:textStyle="bold"
         android:textColor="@color/white"
         android:textSize="18sp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/button" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

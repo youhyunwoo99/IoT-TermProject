@@ -4,6 +4,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -35,6 +37,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -47,7 +50,6 @@ public class MainActivity extends AppCompatActivity {
     private EditText positionInput;
     private String positionText;
     private TextView resultText;
-    private TextView logTextView;
 
 
     private Button addDatasetBtn;
@@ -61,6 +63,11 @@ public class MainActivity extends AppCompatActivity {
 
     private String scanLog;
     private String dbLog;
+
+    private RecyclerView mRecyclerView;
+    private recyclerViewAdapter mRecyclerAdapter;
+
+    private ArrayList<RssiItem> mRssiItem;
 
     private int mode = 0;
 
@@ -85,7 +92,19 @@ public class MainActivity extends AppCompatActivity {
 
         positionInput = findViewById(R.id.positionInput);
         resultText = findViewById(R.id.resultText);
-        logTextView = findViewById(R.id.app_log);
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.scroll);
+
+        /* initiate adapter */
+        mRecyclerAdapter = new recyclerViewAdapter();
+
+        mRssiItem = new ArrayList<>();
+        mRecyclerAdapter.setRssiList(mRssiItem);
+
+        /* initiate recyclerview */
+        mRecyclerView.setAdapter(mRecyclerAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
         // WiFi Scan을 위한 권한 요청
         if (ContextCompat.checkSelfPermission(MainActivity.this,
@@ -187,13 +206,18 @@ public class MainActivity extends AppCompatActivity {
 
             scanLog = "";
             dbLog ="";
+            mRssiItem = new ArrayList<>();
+
             for (ScanResult scanResult : scanResultList) {
+                Log.d("scanResult",scanResult.toString());
                 scanLog += "BSSID: " + scanResult.BSSID + "  level: " + scanResult.level + "\n";
+
+                mRssiItem.add(new RssiItem(scanResult.SSID.toString(), scanResult.BSSID, String.valueOf(scanResult.level)));
 
                 //scanLog += scanResult.toString()+ "\n";
             }
+            mRecyclerAdapter.setRssiList(mRssiItem);
 
-            logTextView.setText(scanLog);
             resultText.setBackgroundColor(Color.parseColor("#0000FF"));
             scanFlag = true;
             buttonEnable();
@@ -235,7 +259,6 @@ public class MainActivity extends AppCompatActivity {
                     RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
                     String mRequestBody = result_json.toString(); // json 을 통신으로 보내기위해 문자열로 변환하는 부분
 
-                    Log.d("제발", URL + mRequestBody);
                     StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, response -> {
                         String position = response.split("\"")[3];
                         resultText.setText(position); // 결과 출력해주는 부분
